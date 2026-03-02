@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: PayHub REST API
+  description: >
+    Enterprise Payment Orchestration Hub. 
+    All endpoints follow `kebab-case` naming conventions and return standard JSON error envelopes.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@payhub.com
+
+servers:
+  - url: https://api.payhub.com/v1
+    description: Production Environment
+  - url: https://staging-api.payhub.com/v1
+    description: Staging Environment
+
+# 1. Global Security Requirement
+security:
+  - BearerAuth: []
+
+paths:
+  # Resource using kebab-case as per our README standards
+  /payment-methods:
+    get:
+      summary: List payment methods
+      operationId: getPaymentMethods
+      tags:
+        - Payments
+      responses:
+        '200':
+          description: A list of payment methods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethod'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /payment-methods/{methodId}:
+    parameters:
+      - name: methodId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get a specific payment method
+      operationId: getPaymentMethodById
+      tags:
+        - Payments
+      responses:
+        '200':
+          description: Payment method details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethod'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  # 2. Security Schemes (JWT)
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # 3. Reusable Data Models (Schemas)
+  schemas:
+    PaymentMethod:
+      type: object
+      required:
+        - id
+        - method_type
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        method_type:
+          type: string
+          enum: [credit_card, bank_account, digital_wallet]
+          example: "credit_card"
+        last_four:
+          type: string
+          pattern: '^[0-9]{4}$'
+          example: "4242"
+        expiry_date:
+          type: string
+          example: "12/28"
+
+    # The Standard Error Envelope from our README
+    ErrorEnvelope:
+      type: object
+      required:
+        - errorCode
+        - message
+      properties:
+        errorCode:
+          type: string
+          example: "RESOURCE_NOT_FOUND"
+        message:
+          type: string
+          example: "The requested payment method does not exist."
+        correlationId:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+
+  # 4. Reusable Responses (Consistency)
+  responses:
+    UnauthorizedError:
+      description: Authentication information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFoundError:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalServerError:
+      description: An unexpected error occurred on the server.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
