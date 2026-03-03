@@ -21,9 +21,14 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      - name: Run PayHub Tests
-        # This command runs your exported Postman collection against your environment
+      - name: Run PayHub Dev Tests
         run: |
           newman run postman/PayHub\ REST\ API.postman_collection.json \
           -e postman/PayHub-Dev.postman_environment.json \
+          --reporters cli
+
+      - name: Run PayHub UAT Tests
+        run: |
+          newman run postman/PayHub\ REST\ API.postman_collection.json \
+          -e postman/PayHub-UAT.postman_environment.json \
           --reporters cli
