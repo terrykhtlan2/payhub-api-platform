@@ -27,14 +27,14 @@ jobs:
         run: mkdir -p reports
 
       - name: Run PayHub Dev Tests
-        # We use double quotes here because your filename has spaces
+        # We wrap these in quotes because filenames with spaces cause errors in Linux
         run: |
           newman run "postman/PayHub REST API.postman_collection.json" \
           -e "postman/PayHub-Dev.postman_environment.json" \
           -r cli,htmlextra --reporter-htmlextra-export reports/dev-report.html
 
       - name: Upload Reports to GitHub
-        if: always() # This ensures you get a report even if the tests fail
+        if: always() # This ensures reports are available even if tests fail
         uses: actions/upload-artifact@v3
         with:
           name: PayHub-Test-Reports
