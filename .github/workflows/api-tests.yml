@@ -23,19 +23,16 @@ jobs:
           npm install -g newman
           npm install -g newman-reporter-htmlextra
 
-      - name: Create Reports Directory
-        run: mkdir -p reports
-
-      - name: Run PayHub Dev Tests
-        # The **/ pattern searches all subfolders for any file ending in .json
+      - name: Run PayHub Tests
+        # We are using the exact folder path from your sidebar
         run: |
-          newman run **/*collection.json \
-          -e **/*environment.json \
-          -r cli,htmlextra --reporter-htmlextra-export reports/dev-report.html
+          newman run "./postman/PayHub REST API.postman_collection.json" \
+          -e "./postman/PayHub-Dev.postman_environment.json" \
+          -r cli,htmlextra --reporter-htmlextra-export reports/payhub-report.html
 
-      - name: Upload Reports to GitHub
-        if: always() 
+      - name: Upload HTML Report
+        if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: PayHub-Test-Reports
+          name: PayHub-Test-Report
           path: reports/
