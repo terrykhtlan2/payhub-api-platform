@@ -1,0 +1,29 @@
+name: PayHub API Automation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run PayHub Tests
+        # This command runs your exported Postman collection against your environment
+        run: |
+          newman run postman/PayHub\ REST\ API.postman_collection.json \
+          -e postman/PayHub-Dev.postman_environment.json \
+          --reporters cli
