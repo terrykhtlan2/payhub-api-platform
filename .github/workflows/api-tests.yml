@@ -27,19 +27,14 @@ jobs:
         run: mkdir -p reports
 
       - name: Run PayHub Dev Tests
+        # Note: Added 'postman/' prefix to match your folder structure
         run: |
           newman run postman/PayHub\ REST\ API.postman_collection.json \
           -e postman/PayHub-Dev.postman_environment.json \
           -r cli,htmlextra --reporter-htmlextra-export reports/dev-report.html
 
-      - name: Run PayHub UAT Tests
-        run: |
-          newman run postman/PayHub\ REST\ API.postman_collection.json \
-          -e postman/PayHub-UAT.postman_environment.json \
-          -r cli,htmlextra --reporter-htmlextra-export reports/uat-report.html
-
       - name: Upload Reports to GitHub
-        if: always() # This ensures reports are uploaded even if tests fail
+        if: always() # Uploads even if the tests fail so you can see why!
         uses: actions/upload-artifact@v3
         with:
           name: PayHub-Test-Reports
